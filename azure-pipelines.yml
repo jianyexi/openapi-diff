@@ -9,6 +9,47 @@ steps:
   displayName: npm install
 - script: npm test
   displayName: test
+- task: EsrpCodeSigning@1
+  inputs:
+    ConnectedServiceName: 'Swaggger Tools ESRP connection'
+    FolderPath: 'src/dotnet/AutoRest/bin/netcoreapp2.0'
+    Pattern: '*.dll,*.exe'
+    signConfigType: 'inlineSignParams'
+    inlineOperation: |
+      [
+          {
+              "KeyCode": "CP-230012",
+              "OperationSetCode": "SigntoolSign",
+              "parameters": [
+                  {
+                      "parameterName": "OpusName",
+                      "parameterValue": "Microsoft"
+                  },
+                  {
+                      "parameterName": "OpusInfo",
+                      "parameterValue": "http://www.microsoft.com"
+                  },
+                  {
+                      "parameterName": "PageHash",
+                      "parameterValue": "/NPH"
+                  },
+                  {
+                      "parameterName": "FileDigest",
+                      "parameterValue": "/fd sha256"
+                  },
+                  {
+                      "parameterName": "TimeStamp",
+                      "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+                  }
+              ],
+              "ToolName": "signtool.exe",
+              "ToolVersion": "6.2.9304.0"
+          }
+      ]
+    SessionTimeout: '60'
+    MaxConcurrency: '50'
+    MaxRetryAttempts: '5'
+
 - script: npm pack
   displayName: pack
 - task: CopyFiles@2
